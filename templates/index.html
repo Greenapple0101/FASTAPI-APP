@@ -1,122 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-Do List</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: white;
-      margin-top: 50px;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      width: 400px;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
-    }
-    #todo-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 20px 0;
-    }
-    #todo-list li {
-      background: #f0f2f5;
-      margin: 8px 0;
-      padding: 10px 15px;
-      border-radius: 8px;
-      transition: background 0.3s;
-    }
-    #todo-list li:hover {
-      background: #e0e3e7;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    input {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      outline: none;
-      font-size: 14px;
-      transition: border 0.3s;
-    }
-    input:focus {
-      border: 1px solid #4a90e2;
-    }
-    button {
-      padding: 10px;
-      background: #4a90e2;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 15px;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #357ab7;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
 </head>
 <body>
-  <div class="container">
     <h1>To-Do List</h1>
     <ul id="todo-list"></ul>
     <form id="todo-form">
-      <input type="text" id="title" placeholder="Title" required>
-      <input type="text" id="description" placeholder="Description" required>
-      <button type="submit">Add To-Do</button>
+        <input type="text" id="title" placeholder="Title" required>
+        <input type="text" id="description" placeholder="Description" required>
+        <button type="submit">Add To-Do</button>
     </form>
-  </div>
-  
-  <script>
-    async function fetchTodos() {
-      const response = await fetch('/todos');
-      const todos = await response.json();
-      const todoList = document.getElementById('todo-list');
-      todoList.innerHTML = '';
-      todos.forEach(todo => {
-        const li = document.createElement('li');
-        li.textContent = `${todo.title}: ${todo.description}`;
-        todoList.appendChild(li);
-      });
-    }
+    <script>
+        async function fetchTodos() {
+            const response = await fetch('/todos');
+            const todos = await response.json();
+            const todoList = document.getElementById('todo-list');
+            todoList.innerHTML = '';
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.textContent = `${todo.title}: ${todo.description}`;
+                todoList.appendChild(li);
+            });
+        }
 
-    document.getElementById('todo-form').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const title = document.getElementById('title').value;
-      const description = document.getElementById('description').value;
-      const response = await fetch('/todos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id: Date.now(), title, description, completed: false })
-      });
-      if (response.ok) {
-        document.getElementById('title').value = '';
-        document.getElementById('description').value = '';
+        document.getElementById('todo-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const response = await fetch('/todos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: Date.now(), title, description, completed: false })
+            });
+            if (response.ok) {
+                fetchTodos();
+            }
+        });
+
         fetchTodos();
-      }
-    });
-
-    fetchTodos();
-  </script>
+    </script>
 </body>
 </html>
