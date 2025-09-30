@@ -24,10 +24,20 @@ TODO_FILE = "todo.json"
 
 # JSON 파일에서 To-Do 항목 로드
 def load_todos():
-    if os.path.exists(TODO_FILE):
-        with open(TODO_FILE, "r") as file:
-            return json.load(file)
-    return []
+    try:
+        if os.path.exists(TODO_FILE):
+            with open(TODO_FILE, "r") as file:
+                data = json.load(file)
+                # Ensure we always return a list
+                if isinstance(data, list):
+                    return data
+                elif isinstance(data, dict) and 'todos' in data:
+                    return data['todos']
+                else:
+                    return []
+        return []
+    except (json.JSONDecodeError, FileNotFoundError, KeyError):
+        return []
 
 # JSON 파일에 To-Do 항목 저장
 def save_todos(todos):
@@ -43,6 +53,13 @@ def get_todos():
 @app.post("/todos", response_model=TodoItem)
 def create_todo(todo: TodoCreate):
     todos = load_todos()
+    print(f"DEBUG: todos type: {type(todos)}, content: {todos}")
+    
+    # Ensure todos is a list
+    if not isinstance(todos, list):
+        print(f"ERROR: todos is not a list, it's {type(todos)}")
+        todos = []
+    
     # Generate new ID
     new_id = max([t.get("id", 0) for t in todos], default=0) + 1
     new_todo = TodoItem(
