@@ -41,8 +41,13 @@ def load_todos():
 
 # JSON 파일에 To-Do 항목 저장
 def save_todos(todos):
-    with open(TODO_FILE, "w") as file:
-        json.dump(todos, file, indent=4)
+    try:
+        with open(TODO_FILE, "w") as file:
+            json.dump(todos, file, indent=4)
+        print(f"DEBUG: Successfully saved {len(todos)} todos to {TODO_FILE}")
+    except Exception as e:
+        print(f"ERROR: Failed to save todos: {e}")
+        raise
 
 # To-Do 목록 조회
 @app.get("/todos", response_model=list[TodoItem])
@@ -94,6 +99,11 @@ def delete_todo(todo_id: int):
 # HTML 파일 서빙
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    with open("templates/index.html", "r") as file:
-        content = file.read()
-    return HTMLResponse(content=content)
+    try:
+        with open("templates/index.html", "r", encoding="utf-8") as file:
+            content = file.read()
+        return HTMLResponse(content=content)
+    except FileNotFoundError:
+        return HTMLResponse(content="<h1>Template file not found</h1>", status_code=500)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error loading template: {str(e)}</h1>", status_code=500)
