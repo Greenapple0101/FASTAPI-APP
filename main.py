@@ -18,10 +18,20 @@ TODO_FILE = "todo.json"
 
 # JSON 파일에서 To-Do 항목 로드
 def load_todos():
-    if os.path.exists(TODO_FILE):
-        with open(TODO_FILE, "r") as file:
-            return json.load(file)
-    return []
+    try:
+        if os.path.exists(TODO_FILE):
+            with open(TODO_FILE, "r") as file:
+                data = json.load(file)
+                # Ensure we always return a list
+                if isinstance(data, list):
+                    return data
+                elif isinstance(data, dict) and 'todos' in data:
+                    return data['todos']
+                else:
+                    return []
+        return []
+    except (json.JSONDecodeError, FileNotFoundError, KeyError):
+        return []
 
 # JSON 파일에 To-Do 항목 저장
 def save_todos(todos):
