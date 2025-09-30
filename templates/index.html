@@ -1,210 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastAPI Todo App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .todo-form {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        .todo-item {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .todo-content {
-            flex: 1;
-        }
-        .todo-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .todo-description {
-            color: #666;
-            font-size: 14px;
-        }
-        .todo-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .btn-edit {
-            background: #28a745;
-        }
-        .btn-delete {
-            background: #dc3545;
-        }
-        .btn-edit:hover {
-            background: #1e7e34;
-        }
-        .btn-delete:hover {
-            background: #c82333;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      margin-top: 50px;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 400px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    #todo-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+    }
+    #todo-list li {
+      background: #f0f2f5;
+      margin: 8px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    #todo-list li:hover {
+      background: #e0e3e7;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      font-size: 14px;
+      transition: border 0.3s;
+    }
+    input:focus {
+      border: 1px solid #4a90e2;
+    }
+    button {
+      padding: 10px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #357ab7;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>FastAPI Todo App</h1>
-        
-        <div class="todo-form">
-            <h3>Add New Todo</h3>
-            <form id="todoForm">
-                <div class="form-group">
-                    <label for="title">Title:</label>
-                    <input type="text" id="title" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="description">Description:</label>
-                    <textarea id="description" name="description" rows="3"></textarea>
-                </div>
-                <button type="submit">Add Todo</button>
-            </form>
-        </div>
+  <div class="container">
+    <h1>To-Do List</h1>
+    <ul id="todo-list"></ul>
+    <form id="todo-form">
+      <input type="text" id="title" placeholder="Title" required>
+      <input type="text" id="description" placeholder="Description" required>
+      <button type="submit">Add To-Do</button>
+    </form>
+  </div>
+  
+  <script>
+    async function fetchTodos() {
+      const response = await fetch('/todos');
+      const todos = await response.json();
+      const todoList = document.getElementById('todo-list');
+      todoList.innerHTML = '';
+      todos.forEach(todo => {
+        const li = document.createElement('li');
+        li.textContent = `${todo.title}: ${todo.description}`;
+        todoList.appendChild(li);
+      });
+    }
 
-        <div id="todos">
-            {% for todo in todos %}
-            <div class="todo-item" data-id="{{ todo.id }}">
-                <div class="todo-content">
-                    <div class="todo-title">{{ todo.title }}</div>
-                    <div class="todo-description">{{ todo.description }}</div>
-                </div>
-                <div class="todo-actions">
-                    <button class="btn-edit" onclick="editTodo('{{ todo.id }}')">Edit</button>
-                    <button class="btn-delete" onclick="deleteTodo('{{ todo.id }}')">Delete</button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+    document.getElementById('todo-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const response = await fetch('/todos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: Date.now(), title, description, completed: false })
+      });
+      if (response.ok) {
+        document.getElementById('title').value = '';
+        document.getElementById('description').value = '';
+        fetchTodos();
+      }
+    });
 
-    <script>
-        document.getElementById('todoForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const todo = {
-                title: formData.get('title'),
-                description: formData.get('description')
-            };
-
-            try {
-                const response = await fetch('/todos/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(todo)
-                });
-
-                if (response.ok) {
-                    location.reload();
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        });
-
-        async function deleteTodo(id) {
-            if (confirm('Are you sure you want to delete this todo?')) {
-                try {
-                    const response = await fetch(`/todos/${id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        location.reload();
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            }
-        }
-
-        function editTodo(id) {
-            const todoItem = document.querySelector(`[data-id="${id}"]`);
-            const title = todoItem.querySelector('.todo-title').textContent;
-            const description = todoItem.querySelector('.todo-description').textContent;
-            
-            const newTitle = prompt('Edit title:', title);
-            if (newTitle !== null) {
-                const newDescription = prompt('Edit description:', description);
-                
-                updateTodo(id, newTitle, newDescription);
-            }
-        }
-
-        async function updateTodo(id, title, description) {
-            try {
-                const response = await fetch(`/todos/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        title: title,
-                        description: description
-                    })
-                });
-
-                if (response.ok) {
-                    location.reload();
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-    </script>
+    fetchTodos();
+  </script>
 </body>
 </html>
