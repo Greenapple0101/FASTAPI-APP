@@ -13,6 +13,12 @@ class TodoItem(BaseModel):
     description: str
     completed: bool
 
+# To-Do 생성용 모델 (id 없음)
+class TodoCreate(BaseModel):
+    title: str
+    description: str
+    completed: bool = False
+
 # JSON 파일 경로
 TODO_FILE = "todo.json"
 
@@ -35,11 +41,19 @@ def get_todos():
 
 # 신규 To-Do 항목 추가
 @app.post("/todos", response_model=TodoItem)
-def create_todo(todo: TodoItem):
+def create_todo(todo: TodoCreate):
     todos = load_todos()
-    todos.append(todo.dict())
+    # Generate new ID
+    new_id = max([t.get("id", 0) for t in todos], default=0) + 1
+    new_todo = TodoItem(
+        id=new_id,
+        title=todo.title,
+        description=todo.description,
+        completed=todo.completed
+    )
+    todos.append(new_todo.dict())
     save_todos(todos)
-    return todo
+    return new_todo
 
 # To-Do 항목 수정
 @app.put("/todos/{todo_id}", response_model=TodoItem)
