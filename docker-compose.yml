@@ -1,14 +1,10 @@
-version: "3.9"
-services:
-  fastapi:
-    build:
-      context: ./fastapi-app
-    container_name: fastapi-todos
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./fastapi-app:/app
-    environment:
-      - PYTHONUNBUFFERED=1
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+version: "3.7"
 
+services:
+  fastapi-app:
+    build:
+      context: ./fastapi-app      # Dockerfile이 위치한 디렉토리 경로
+      dockerfile: Dockerfile      # Dockerfile 이름 (생략 가능, 기본값은 'Dockerfile')
+    container_name: FastApi-app
+    ports:
+      - "5001:5001"
